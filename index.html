@@ -30,11 +30,12 @@
         // ==================== STATE MANAGEMENT ====================
         let state = {
             step: 'intro',
-            smeData: { companyName: '', industry: '', employees: '', revenue: '' },
+            smeData: { companyName: '', registrationNumber: '', industry: '', employees: '', revenue: '' },
             selectedEO: '',
             eoAnswers: {},
             dnshAnswers: {},
             socialAnswers: {},
+            rmtAnswers: {},
             results: null
         };
 
@@ -45,11 +46,11 @@
                 description: 'Reduce greenhouse gas emissions and climate change impacts',
                 icon: '🌍',
                 questions: [
-                    { id: 'eo1_q1', text: 'Does your business reduce greenhouse gas emissions?', weight: 20 },
-                    { id: 'eo1_q2', text: 'Do you use renewable energy sources (solar, wind, etc.)?', weight: 20 },
-                    { id: 'eo1_q3', text: 'Do you have energy efficiency programs?', weight: 20 },
-                    { id: 'eo1_q4', text: 'Do you track your company\'s carbon footprint?', weight: 20 },
-                    { id: 'eo1_q5', text: 'Do you have emission reduction targets?', weight: 20 }
+                    { id: 'eo1_q1', text: 'Does your business reduce greenhouse gas emissions?' },
+                    { id: 'eo1_q2', text: 'Do you use renewable energy sources (solar, wind, etc.)?' },
+                    { id: 'eo1_q3', text: 'Do you have energy efficiency programs?' },
+                    { id: 'eo1_q4', text: 'Do you track your company\'s carbon footprint?' },
+                    { id: 'eo1_q5', text: 'Do you have emission reduction targets?' }
                 ]
             },
             EO2: {
@@ -57,10 +58,10 @@
                 description: 'Increase resilience to climate change impacts',
                 icon: '🌦️',
                 questions: [
-                    { id: 'eo2_q1', text: 'Do you assess climate risks to your business?', weight: 25 },
-                    { id: 'eo2_q2', text: 'Do you have adaptation plans for extreme weather?', weight: 25 },
-                    { id: 'eo2_q3', text: 'Are your facilities resilient to floods/droughts?', weight: 25 },
-                    { id: 'eo2_q4', text: 'Do you have water conservation systems?', weight: 25 }
+                    { id: 'eo2_q1', text: 'Do you assess climate risks to your business?' },
+                    { id: 'eo2_q2', text: 'Do you have adaptation plans for extreme weather?' },
+                    { id: 'eo2_q3', text: 'Are your facilities resilient to floods/droughts?' },
+                    { id: 'eo2_q4', text: 'Do you have water conservation systems?' }
                 ]
             },
             EO3: {
@@ -68,10 +69,10 @@
                 description: 'Protect nature and biodiversity',
                 icon: '🌿',
                 questions: [
-                    { id: 'eo3_q1', text: 'Do your operations avoid damaging natural habitats?', weight: 25 },
-                    { id: 'eo3_q2', text: 'Do you have measures to protect biodiversity?', weight: 25 },
-                    { id: 'eo3_q3', text: 'Do you avoid deforestation or land degradation?', weight: 25 },
-                    { id: 'eo3_q4', text: 'Do you use sustainable raw materials?', weight: 25 }
+                    { id: 'eo3_q1', text: 'Do your operations avoid damaging natural habitats?' },
+                    { id: 'eo3_q2', text: 'Do you have measures to protect biodiversity?' },
+                    { id: 'eo3_q3', text: 'Do you avoid deforestation or land degradation?' },
+                    { id: 'eo3_q4', text: 'Do you use sustainable raw materials?' }
                 ]
             },
             EO4: {
@@ -79,19 +80,33 @@
                 description: 'Efficient resource use and circular economy principles',
                 icon: '♻️',
                 questions: [
-                    { id: 'eo4_q1', text: 'Do you have waste reduction programs?', weight: 25 },
-                    { id: 'eo4_q2', text: 'Do you recycle or reuse materials?', weight: 25 },
-                    { id: 'eo4_q3', text: 'Do you apply circular economy principles?', weight: 25 },
-                    { id: 'eo4_q4', text: 'Do you use sustainable packaging?', weight: 25 }
+                    { id: 'eo4_q1', text: 'Do you have waste reduction programs?' },
+                    { id: 'eo4_q2', text: 'Do you recycle or reuse materials?' },
+                    { id: 'eo4_q3', text: 'Do you apply circular economy principles?' },
+                    { id: 'eo4_q4', text: 'Do you use sustainable packaging?' }
                 ]
             }
         };
 
-        const dnshQuestions = [
-            { id: 'dnsh1', text: 'Do your activities NOT significantly harm other environmental objectives?', icon: '⚠️' },
-            { id: 'dnsh2', text: 'Do you have proper waste management systems?', icon: '🗑️' },
-            { id: 'dnsh3', text: 'Do you comply with Indonesian environmental regulations?', icon: '📋' }
-        ];
+        // DNSH Questions are now dynamic based on selected EO
+        function getDNSHQuestions(selectedEO) {
+            const dnshByEO = {
+                EO1: [
+                    { id: 'dnsh1', text: 'Does the Activity have at least an effort to support the reduction of Greenhouse Gas emissions?', icon: '🌍' }
+                ],
+                EO2: [
+                    { id: 'dnsh1', text: 'Does the Activity support human/natural resilience to climate change impacts?', icon: '🌦️' }
+                ],
+                EO3: [
+                    { id: 'dnsh1', text: 'Does the Activity have Environmental Approval, at least in the form of SPPL (Statement of Ability to Manage and Monitor the Environment)?', icon: '📋' },
+                    { id: 'dnsh2', text: 'Does the Activity maintain the condition and resilience of the surrounding ecosystem?', icon: '🌿' }
+                ],
+                EO4: [
+                    { id: 'dnsh1', text: 'Does the Activity apply the basic principles of circular economy such as efficient production and consumption, reduction of environmental impact, minimization of waste of products, materials and other resources, and waste treatment?', icon: '♻️' }
+                ]
+            };
+            return dnshByEO[selectedEO] || [];
+        }
 
         const socialQuestions = [
             { id: 'social1', text: 'Do you comply with workplace safety standards?', icon: '🦺' },
@@ -100,14 +115,19 @@
             { id: 'social4', text: 'Do you have gender equality policies?', icon: '⚖️' }
         ];
 
+        const rmtQuestions = [
+            { id: 'rmt1', text: 'Has the implementation of remedial measures already started at the time of assessment?', icon: '🔧' },
+            { id: 'rmt2', text: 'Does the activity no longer cause significant harm to other Environmental Objectives at the time of assessment?', icon: '✅' }
+        ];
+
         // ==================== CALCULATION FUNCTIONS ====================
         function calculateEOScore(answers, questions) {
-            let totalWeight = 0, earnedWeight = 0;
+            let totalQuestions = questions.length;
+            let yesCount = 0;
             questions.forEach(q => {
-                totalWeight += q.weight;
-                if (answers[q.id] === 'yes') earnedWeight += q.weight;
+                if (answers[q.id] === 'yes') yesCount++;
             });
-            return Math.round((earnedWeight / totalWeight) * 100);
+            return Math.round((yesCount / totalQuestions) * 100);
         }
 
         function checkPass(answers) {
@@ -118,10 +138,12 @@
             const eoScore = calculateEOScore(state.eoAnswers, environmentalObjectives[state.selectedEO].questions);
             const dnshPass = checkPass(state.dnshAnswers);
             const socialPass = checkPass(state.socialAnswers);
+            const rmtPass = checkPass(state.rmtAnswers);
 
             let classification, color, bgColor, recommendations;
 
-            if (eoScore >= 80 && dnshPass && socialPass) {
+            // GREEN: Perfect score on EO + DNSH Pass + Social Pass
+            if (eoScore === 100 && dnshPass && socialPass) {
                 classification = 'GREEN';
                 color = 'text-green-600';
                 bgColor = 'bg-green-50';
@@ -132,25 +154,35 @@
                     '📄 Document your achievements for bank applications',
                     '🌟 Consider becoming a sustainability leader in your industry'
                 ];
-            } else if (eoScore >= 60 || (eoScore >= 50 && (dnshPass || socialPass))) {
+            } 
+            // TRANSITION: Good progress toward sustainability
+            else if (
+                (eoScore >= 60 && (dnshPass || socialPass)) || 
+                (eoScore >= 60 && rmtPass && socialPass)
+            ) {
                 classification = 'TRANSITION';
                 color = 'text-yellow-600';
                 bgColor = 'bg-yellow-50';
                 recommendations = [
                     '📊 Your business is in transition toward sustainability',
                     '🎯 Focus on improving areas with low scores',
-                    !dnshPass ? '⚠️ Improve DNSH (Do No Significant Harm) practices' : '',
+                    eoScore < 100 ? '📈 Work on answering YES to all Environmental Objective questions' : '',
+                    !dnshPass && !rmtPass ? '⚠️ Improve DNSH (Do No Significant Harm) practices or implement remedial measures' : '',
                     !socialPass ? '👥 Enhance social aspects: workplace safety, fair wages, equality' : '',
-                    '💼 You can still access some sustainable financing programs',
-                    '📅 Target to achieve 80+ score within 12-24 months',
+                    rmtPass ? '🔧 Your remedial measures are recognized - continue implementation' : '',
+                    '💼 You can access some sustainable financing programs',
+                    '📅 Target to achieve 100% EO score and pass all criteria',
                     '🤝 Consider partnering with sustainability consultants'
                 ].filter(r => r);
-            } else {
+            } 
+            // DOES NOT MEET: Needs significant improvement
+            else {
                 classification = 'DOES NOT MEET CLASSIFICATION';
                 color = 'text-red-600';
                 bgColor = 'bg-red-50';
                 recommendations = [
                     '📌 Your business does not yet meet TKBI standards',
+                    `📊 Current EO Score: ${eoScore}% - Target: 60%+ with DNSH/Social compliance`,
                     '🔧 Start with simple steps: energy efficiency, waste reduction',
                     '👨‍💼 Consult with sustainability experts for an improvement roadmap',
                     '💡 Investment in sustainable practices will unlock financing access',
@@ -161,7 +193,7 @@
             }
 
             state.results = {
-                classification, color, bgColor, eoScore, dnshPass, socialPass, recommendations,
+                classification, color, bgColor, eoScore, dnshPass, socialPass, rmtPass, recommendations,
                 selectedEO: environmentalObjectives[state.selectedEO].name,
                 selectedEOIcon: environmentalObjectives[state.selectedEO].icon
             };
@@ -178,11 +210,11 @@
 
 COMPANY INFORMATION:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Company Name    : ${state.smeData.companyName}
-  Business Registration Number    : ${state.smeData.businessregistrationnumberName}  
-Industry        : ${state.smeData.industry}
-  Employees       : ${state.smeData.employees}
-  Annual Revenue  : ${state.smeData.revenue}
+  Company Name           : ${state.smeData.companyName}
+  Registration Number    : ${state.smeData.registrationNumber}
+  Industry               : ${state.smeData.industry}
+  Employees              : ${state.smeData.employees}
+  Annual Revenue         : ${state.smeData.revenue}
 
 PRIMARY ENVIRONMENTAL OBJECTIVE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -194,6 +226,7 @@ ASSESSMENT RESULTS:
   EO Score                 : ${r.eoScore}/100
   DNSH Check               : ${r.dnshPass ? '✓ PASS' : '✗ FAIL'}
   Social Aspects           : ${r.socialPass ? '✓ PASS' : '✗ FAIL'}
+  RMT (Remedial Measures)  : ${r.rmtPass ? '✓ PASS' : '✗ FAIL'}
 
 RECOMMENDATIONS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -261,7 +294,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-4">
                             <p class="text-sm text-blue-900 font-medium">
                                 📊 The assessment evaluates your business across 4 Environmental Objectives, 
-                                Do No Significant Harm (DNSH) criteria, and Social Aspects.
+                                Do No Significant Harm (DNSH) criteria, Social Aspects, and optionally Remedial Measure Transition (RMT) if DNSH is not met.
                             </p>
                         </div>
                         <p class="text-gray-700 mb-4"><strong>Your business will be classified as:</strong></p>
@@ -284,7 +317,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                         </div>
                         <div class="mt-4 flex items-center text-sm text-gray-600">
                             <span class="mr-2">⏱️</span>
-                            <span>Completion time: <strong>15-20 minutes</strong></span>
+                            <span>Completion time: <strong>12-20 minutes</strong> (varies based on DNSH results)</span>
                         </div>
                     </div>
 
@@ -298,13 +331,14 @@ Framework: Sector Agnostic Decision Tree (SDT)
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Company Name *</label>
                                 <input type="text" id="companyName" 
                                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring focus:ring-green-200 transition" 
-                                    placeholder="PT Green Business Indonesia" value="${state.smeData.companyName}">
+                                    placeholder="PT. Green Business Indonesia" value="${state.smeData.companyName}">
                             </div>
-<div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Business Registration Number *</label>
-                                <input type="text" id="businessregistrationnumberName" 
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Business Registration Number (NIB/NPWP) *</label>
+                                <input type="text" id="registrationNumber" 
                                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring focus:ring-green-200 transition" 
-                                    placeholder="0123456789" value="${state.smeData. businessregistrationnumberName}">
+                                    placeholder="1234567890123" value="${state.smeData.registrationNumber}">
+                                <p class="text-xs text-gray-500 mt-1">Enter your NIB (Nomor Induk Berusaha) or NPWP</p>
                             </div>
                             <div class="grid md:grid-cols-2 gap-5">
                                 <div>
@@ -362,7 +396,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                 <div class="max-w-5xl mx-auto p-4 md:p-8 fade-in">
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
                         <div class="flex items-center mb-2">
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold mr-3">Step 1 of 4</span>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold mr-3">Step 1 of 5</span>
                         </div>
                         <h2 class="text-3xl font-bold mb-3 text-gray-800">Select Primary Environmental Objective</h2>
                         <p class="text-gray-600">
@@ -397,7 +431,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                 <div class="max-w-4xl mx-auto p-4 md:p-8 fade-in">
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">Step 2 of 4</span>
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">Step 2 of 5</span>
                             <span class="text-sm text-gray-600">${answered}/${total} answered</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
@@ -452,22 +486,29 @@ Framework: Sector Agnostic Decision Tree (SDT)
         }
 
         function renderDNSH() {
+            const dnshQuestions = getDNSHQuestions(state.selectedEO);
             const answered = Object.keys(state.dnshAnswers).length;
             const total = dnshQuestions.length;
             const progress = (answered / total) * 100;
+            const eo = environmentalObjectives[state.selectedEO];
 
             return `
                 <div class="max-w-4xl mx-auto p-4 md:p-8 fade-in">
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold">Step 3 of 4</span>
+                            <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm font-bold">Step 3 of 5</span>
                             <span class="text-sm text-gray-600">${answered}/${total} answered</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
                             <div class="bg-orange-600 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
                         </div>
                         <h2 class="text-2xl font-bold mb-2 text-gray-800">DNSH (Do No Significant Harm) Check</h2>
-                        <p class="text-gray-600">Ensure your business activities do NOT significantly harm other environmental objectives.</p>
+                        <p class="text-gray-600 mb-3">Ensure your business activities do NOT significantly harm other environmental objectives.</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <p class="text-sm text-blue-900 font-medium">
+                                ${eo.icon} Based on your selected EO: <strong>${eo.name}</strong>
+                            </p>
+                        </div>
                     </div>
                     <div class="space-y-4">
                         ${dnshQuestions.map((q, idx) => `
@@ -497,13 +538,13 @@ Framework: Sector Agnostic Decision Tree (SDT)
                             </div>
                         `).join('')}
                     </div>
-                    <button onclick="goToSocial()" 
+                    <button onclick="continueFromDNSH()" 
                         class="mt-6 w-full py-4 rounded-lg font-bold text-lg shadow-lg transition ${
                             answered === total
                             ? 'bg-orange-600 text-white hover:bg-orange-700'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }" ${answered !== total ? 'disabled' : ''}>
-                        Continue to Social Aspects →
+                        Continue to Next Step →
                     </button>
                 </div>
             `;
@@ -513,12 +554,14 @@ Framework: Sector Agnostic Decision Tree (SDT)
             const answered = Object.keys(state.socialAnswers).length;
             const total = socialQuestions.length;
             const progress = (answered / total) * 100;
+            const dnshPass = checkPass(state.dnshAnswers);
+            const stepLabel = dnshPass ? 'Step 4 of 4' : 'Step 5 of 5';
 
             return `
                 <div class="max-w-4xl mx-auto p-4 md:p-8 fade-in">
                     <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">Step 4 of 4</span>
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">${stepLabel}</span>
                             <span class="text-sm text-gray-600">${answered}/${total} answered</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
@@ -567,6 +610,69 @@ Framework: Sector Agnostic Decision Tree (SDT)
             `;
         }
 
+        function renderRMT() {
+            const answered = Object.keys(state.rmtAnswers).length;
+            const total = rmtQuestions.length;
+            const progress = (answered / total) * 100;
+
+            return `
+                <div class="max-w-4xl mx-auto p-4 md:p-8 fade-in">
+                    <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold">Step 4 of 5</span>
+                            <span class="text-sm text-gray-600">${answered}/${total} answered</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+                            <div class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2 text-gray-800">RMT (Remedial Measure Transition) Assessment</h2>
+                        <p class="text-gray-600 mb-3">Assessment of remedial measures being implemented to transition toward sustainability.</p>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+                            <p class="text-sm text-yellow-900 font-medium">
+                                ⚠️ This step is required because DNSH criteria were not fully met. Demonstrate your commitment to remedial measures.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        ${rmtQuestions.map((q, idx) => `
+                            <div class="bg-white rounded-xl shadow-lg p-6 hover-scale">
+                                <div class="flex items-start mb-4">
+                                    <span class="text-3xl mr-3">${q.icon}</span>
+                                    <p class="font-semibold text-gray-800 flex-1">${q.text}</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="answerRMT('${q.id}', 'yes')" 
+                                        class="flex-1 py-3 px-6 rounded-lg font-bold transition ${
+                                            state.rmtAnswers[q.id] === 'yes' 
+                                            ? 'bg-green-600 text-white shadow-lg' 
+                                            : 'bg-gray-100 text-gray-700 hover:bg-green-50'
+                                        }">
+                                        ✓ Yes
+                                    </button>
+                                    <button onclick="answerRMT('${q.id}', 'no')" 
+                                        class="flex-1 py-3 px-6 rounded-lg font-bold transition ${
+                                            state.rmtAnswers[q.id] === 'no' 
+                                            ? 'bg-red-600 text-white shadow-lg' 
+                                            : 'bg-gray-100 text-gray-700 hover:bg-red-50'
+                                        }">
+                                        ✗ No
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="goToSocial()" 
+                        class="mt-6 w-full py-4 rounded-lg font-bold text-lg shadow-lg transition ${
+                            answered === total
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }" ${answered !== total ? 'disabled' : ''}>
+                        Continue to Social Aspects →
+                    </button>
+                </div>
+            `;
+        }
+
         function renderResults() {
             const r = state.results;
             return `
@@ -577,6 +683,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                             <h2 class="text-3xl font-bold mb-2 text-gray-800">📊 TKBI Assessment Results</h2>
                             <div class="text-sm text-gray-600 space-y-1">
                                 <p><strong>Company:</strong> ${state.smeData.companyName}</p>
+                                <p><strong>Registration Number:</strong> ${state.smeData.registrationNumber}</p>
                                 <p><strong>Industry:</strong> ${state.smeData.industry}</p>
                                 <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-US', { 
                                     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
@@ -602,7 +709,7 @@ Framework: Sector Agnostic Decision Tree (SDT)
                     </div>
 
                     <!-- Score Breakdown -->
-                    <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="grid md:grid-cols-4 gap-6 mb-6">
                         <div class="bg-white rounded-xl shadow-lg p-6 text-center hover-scale">
                             <div class="text-5xl mb-3">📈</div>
                             <p class="text-sm text-gray-600 mb-2 font-medium">Environmental Objective Score</p>
@@ -626,6 +733,14 @@ Framework: Sector Agnostic Decision Tree (SDT)
                                 ${r.socialPass ? 'PASS' : 'FAIL'}
                             </p>
                             <p class="text-xs text-gray-500 mt-2">Safety, Wages, Equality</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 text-center hover-scale">
+                            <div class="text-5xl mb-3">${r.rmtPass ? '✅' : '❌'}</div>
+                            <p class="text-sm text-gray-600 mb-2 font-medium">RMT</p>
+                            <p class="text-4xl font-black ${r.rmtPass ? 'text-green-600' : 'text-red-600'}">
+                                ${r.rmtPass ? 'PASS' : 'FAIL'}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-2">Remedial Measures</p>
                         </div>
                     </div>
 
@@ -666,12 +781,14 @@ Framework: Sector Agnostic Decision Tree (SDT)
                                 <p>⚠️ <strong>Partial eligibility</strong> for some sustainable financing programs</p>
                                 <p>📊 <strong>Improvement pathway</strong> identified - work on specific areas to reach GREEN status</p>
                                 <p>💼 <strong>Access to transition finance</strong> to support your sustainability journey</p>
-                                <p>🎯 <strong>Target timeline:</strong> 12-24 months to achieve GREEN classification with focused efforts</p>
+                                <p>🎯 <strong>Target:</strong> Achieve 100% EO score with full DNSH and Social compliance for GREEN classification</p>
                                 <p>🤝 <strong>Support available:</strong> Many banks offer consulting to help transition businesses improve</p>
+                                ${r.rmtPass ? '<p>🔧 <strong>RMT recognized:</strong> Your remedial measures show commitment to improvement</p>' : ''}
                             </div>
                         ` : `
                             <div class="space-y-3 text-gray-700">
                                 <p>📌 <strong>Not yet eligible</strong> for green financing programs</p>
+                                <p>📊 <strong>Current status:</strong> EO Score ${r.eoScore}% - Need 60%+ with compliance</p>
                                 <p>🔧 <strong>Immediate action needed</strong> to meet basic sustainability standards</p>
                                 <p>👨‍💼 <strong>Expert guidance recommended</strong> - consider hiring a sustainability consultant</p>
                                 <p>📚 <strong>Training resources:</strong> Free sustainability courses available from OJK and industry associations</p>
@@ -726,11 +843,12 @@ Framework: Sector Agnostic Decision Tree (SDT)
         // ==================== EVENT HANDLERS ====================
         function startAssessment() {
             state.smeData.companyName = document.getElementById('companyName').value.trim();
+            state.smeData.registrationNumber = document.getElementById('registrationNumber').value.trim();
             state.smeData.industry = document.getElementById('industry').value;
             state.smeData.employees = document.getElementById('employees').value;
             state.smeData.revenue = document.getElementById('revenue').value;
 
-            if (!state.smeData.companyName || !state.smeData.industry || !state.smeData.employees || !state.smeData.revenue) {
+            if (!state.smeData.companyName || !state.smeData.registrationNumber || !state.smeData.industry || !state.smeData.employees || !state.smeData.revenue) {
                 alert('⚠️ Please fill in all company information fields before starting the assessment.');
                 return;
             }
@@ -751,7 +869,23 @@ Framework: Sector Agnostic Decision Tree (SDT)
         }
 
         function goToDNSH() {
+            // Reset DNSH answers when moving to DNSH step (in case user goes back and changes EO)
+            state.dnshAnswers = {};
             state.step = 'dnsh';
+            window.scrollTo(0, 0);
+            render();
+        }
+
+        function continueFromDNSH() {
+            const dnshPass = checkPass(state.dnshAnswers);
+            if (dnshPass) {
+                // DNSH Pass: Skip RMT, go directly to Social
+                state.rmtAnswers = {}; // Clear RMT answers since we're skipping it
+                state.step = 'social';
+            } else {
+                // DNSH Fail: Must go through RMT
+                state.step = 'rmt';
+            }
             window.scrollTo(0, 0);
             render();
         }
@@ -772,15 +906,27 @@ Framework: Sector Agnostic Decision Tree (SDT)
             render();
         }
 
+        function goToRMT() {
+            state.step = 'rmt';
+            window.scrollTo(0, 0);
+            render();
+        }
+
+        function answerRMT(questionId, answer) {
+            state.rmtAnswers[questionId] = answer;
+            render();
+        }
+
         function resetAssessment() {
             if (confirm('🔄 Are you sure you want to start a new assessment? Current progress will be lost.')) {
                 state = {
                     step: 'intro',
-                    smeData: { companyName: '', industry: '', employees: '', revenue: '' },
+                    smeData: { companyName: '', registrationNumber: '', industry: '', employees: '', revenue: '' },
                     selectedEO: '',
                     eoAnswers: {},
                     dnshAnswers: {},
                     socialAnswers: {},
+                    rmtAnswers: {},
                     results: null
                 };
                 window.scrollTo(0, 0);
@@ -808,6 +954,9 @@ Framework: Sector Agnostic Decision Tree (SDT)
                     break;
                 case 'social':
                     content = renderSocial();
+                    break;
+                case 'rmt':
+                    content = renderRMT();
                     break;
                 case 'results':
                     content = renderResults();
